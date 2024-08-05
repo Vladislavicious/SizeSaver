@@ -6,13 +6,7 @@ from typing import Tuple, Optional
 from enum import Enum
 
 import pandas as pd
-
-class ResultCodes(Enum):
-  OK = 0
-  NO_FILE = 1
-  EMPTY_FILE = 2
-  BAD_DATA = 3
-  NO_ELF_FILE_EXISTS = 4
+from Misc.codes import ResultCodes
 
 def intTryParse(value):
     try:
@@ -23,33 +17,32 @@ def intTryParse(value):
         except ValueError:
           return None
 
-class myParser:
-  def __init__(self, filename: str) -> None:
-    self.__filename = filename
+class myStrParser:
+  def __init__(self, str: str) -> None:
+    self._text = str
     self.__columnNames = list()
     self.__values = list()
 
-  def __is_file_exist(self) -> bool:
-    return os.path.exists(self.__filename)
+  def _parseLines(self) -> Tuple[str, str]:
+    lines = self._text.split("\n")
+    if( len(lines) < 2 ):
+      return ("", "")
 
-  # Возвращает результат и описание, если ошибка
+    return (lines[0], lines[1])
+
+  def _on_empty_line(self) -> Tuple[ResultCodes, str]:
+    return (ResultCodes.NO_OPTIONS, f"Passed no options")
+
   def parse_raw(self) -> Tuple[ResultCodes, str]:
-    if self.__is_file_exist() is False:
-      return (ResultCodes.NO_FILE, f"No such file {self.__filename}")
-
-    with open(self.__filename, "r") as file:
-      firstLine = file.readline()
-      if len(firstLine) == 0:
-        return (ResultCodes.EMPTY_FILE, f"Passed empty file")
-
-      secondLine = file.readline()
+    firstLine, secondLine = self._parseLines()
+    if len(firstLine) == 0:
+      return self._on_empty_line()
 
     columns = firstLine.split()
     values = secondLine.split()
 
-    self.__columnNames = columns
-    self.__values = values
-
+    self.__columnNames = list( columns )
+    self.__values = list( values )
     return (ResultCodes.OK, "All ok")
 
   def refine(self) -> Tuple[ResultCodes, str]:
@@ -96,3 +89,30 @@ class myParser:
 
   def getColumnNames(self):
     return self.__columnNames
+
+class myFileParser(myStrParser):
+  def __init__(self, filename: str) -> None:
+    super().__init__("")
+
+    self.__filename = filename
+
+  def __is_file_exist(self) -> bool:
+    return os.path.exists(self.__filename)
+
+  def _on_empty_line(self) -> Tuple[ResultCodes, str]:
+    return (ResultCodes.EMPTY_FILE, f"Passed empty file")
+
+  def _parseLines(self):
+    with open(self.__filename, "r") as file:
+      firstLine = file.readline()
+
+      secondLine = file.readline()
+
+      return (firstLine, secondLine)
+
+  # Возвращает результат и описание, если ошибка
+  def parse_raw(self) -> Tuple[ResultCodes, str]:
+    if self.__is_file_exist() is False:
+      return (ResultCodes.NO_FILE, f"No such file {self.__filename}")
+
+    return super().parse_raw()

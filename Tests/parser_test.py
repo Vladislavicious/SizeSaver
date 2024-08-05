@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime
-from Parser.parser import myParser
+from Parser.parser import myFileParser
 from Parser.parser import ResultCodes
 
 import pandas as pd
@@ -16,11 +16,11 @@ import pandas as pd
 
 class TestParserFunctions(unittest.TestCase):
   def test_createParser(self):
-    parser = myParser("")
+    parser = myFileParser("")
 
   def common_TryParseRaw(self, filename: str,
-                         expected_result_code: ResultCodes) -> myParser:
-    parser = myParser(filename)
+                         expected_result_code: ResultCodes) -> myFileParser:
+    parser = myFileParser(filename)
 
     result, description = parser.parse_raw()
 
@@ -29,7 +29,7 @@ class TestParserFunctions(unittest.TestCase):
 
   def common_TryParseRefined(self, filename: str,
                              expected_result_code: ResultCodes,
-                             expected_values) -> myParser:
+                             expected_values) -> myFileParser:
     parser = self.common_TryParseRaw(filename, ResultCodes.OK)
     result, description = parser.refine()
 
@@ -99,7 +99,7 @@ class TestParserFunctions(unittest.TestCase):
     self.assertEqual(type(time), pd.Timestamp)
 
   def test_GetFullDataFrame(self):
-    parser = myParser("Tests/Files/TestFile2.txt")
+    parser = myFileParser("Tests/Files/TestFile2.txt")
 
     df = parser.parse_dataframe()
     time = parser.GetLastModifiedTime()
