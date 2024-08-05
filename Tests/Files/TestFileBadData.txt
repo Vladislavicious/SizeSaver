@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+    648	     sv	     15	    663	    297	./bin/uno/FirstProject/FirstProject_.elf

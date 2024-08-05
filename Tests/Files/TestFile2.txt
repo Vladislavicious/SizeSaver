@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+    516	      0	      8	    524	    20c	./Tests/Files/EmptyFile.txt
