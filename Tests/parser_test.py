@@ -101,14 +101,17 @@ class TestParserFunctions(unittest.TestCase):
   def test_GetFullDataFrame(self):
     parser = myFileParser("Tests/Files/TestFile2.txt")
 
-    df = parser.parse_dataframe()
+    result, description = parser.parse_dataframe()
+    self.assertEqual(result, ResultCodes.OK)
+
+    df = parser.getDataFrame()
     time = parser.GetLastModifiedTime()
 
     self.assertEqual(type(df), pd.DataFrame)
-    expected_column_names = ['text', 'data', 'bss', 'dec', 'hex', 'filename', 'timemodified']
+    expected_column_names = ['text', 'data', 'bss', 'dec', 'hex', 'filename', 'last modified']
     expected_values = [516, 0, 8, 524, 524, "./Tests/Files/EmptyFile.txt", time]
     expected_df = pd.DataFrame(columns=expected_column_names)
     expected_df.loc[0] = expected_values
-    expected_df["timemodified"] = [ time ]
+    expected_df["last modified"] = [ time ]
 
     self.assertTrue(df.equals(expected_df))

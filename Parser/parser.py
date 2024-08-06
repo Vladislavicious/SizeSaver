@@ -22,6 +22,7 @@ class myStrParser:
     self._text = str
     self.__columnNames = list()
     self.__values = list()
+    self.__DataFrame = pd.DataFrame()
 
   def _parseLines(self) -> Tuple[str, str]:
     lines = self._text.split("\n")
@@ -70,19 +71,21 @@ class myStrParser:
   def parse_dataframe(self) -> Optional[pd.DataFrame]:
     result, description = self.parse_raw()
     if result != ResultCodes.OK:
-      print(description)
-      return None
+      return (result, description)
 
     result, description = self.refine()
     if result != ResultCodes.OK:
-      print(description)
-      return None
+      return (result, description)
 
     df = pd.DataFrame(columns=self.__columnNames)
     df.loc[0] = self.__values
 
-    df["timemodified"] = [ self.GetLastModifiedTime() ]
-    return df
+    df["last modified"] = [ self.GetLastModifiedTime() ]
+    self.__DataFrame = df.copy(True)
+    return (ResultCodes.OK, "All ok")
+
+  def getDataFrame(self):
+    return self.__DataFrame
 
   def getValues(self):
     return self.__values

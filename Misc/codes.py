@@ -8,3 +8,4 @@ class ResultCodes(Enum):
   NO_ELF_FILE_EXISTS = 4
   NO_OPTIONS = 5
   BAD_FILE_FORMAT = 6
+  SIMULTUNANEOUS_OPTIONS = 7
