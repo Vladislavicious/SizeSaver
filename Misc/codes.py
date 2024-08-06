@@ -7,3 +7,4 @@ class ResultCodes(Enum):
   BAD_DATA = 3
   NO_ELF_FILE_EXISTS = 4
   NO_OPTIONS = 5
+  BAD_FILE_FORMAT = 6
