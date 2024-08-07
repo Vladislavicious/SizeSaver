@@ -1,8 +1,10 @@
 import unittest
+import os.path
 
 import pandas as pd
 from Options.argHandler import ArgumentHandler
 from Misc.codes import ResultCodes
+from DataWorker.worker import STANDARD_FILENAME
 
 class TestArgumentHandler(unittest.TestCase):
   def test_createArgParser(self):
@@ -76,9 +78,46 @@ class TestArgumentHandler(unittest.TestCase):
     result, description = argHandler.react()
     self.assertEqual(result, ResultCodes.OK, description)
 
+    df = argHandler.getRefinedData()
+    self.assertTrue(type(df) is not None)
+
+
   def test_reactOnNonExistingFile(self):
     argHandler = ArgumentHandler()
     result = argHandler.parse(["--filepath=./Tests/Fil.txt"])
 
     result, description = argHandler.react()
     self.assertEqual(result, ResultCodes.NO_FILE, description)
+
+  def test_fullCycleWithExistingString(self):
+    argHandler = ArgumentHandler()
+    saveFileName = "saveStringFile.csv"
+    if os.path.exists(saveFileName):
+      os.remove(saveFileName)
+    self.assertFalse(os.path.exists(saveFileName))
+
+    with open("./Tests/Files/TestFile1.txt", "r", encoding="utf-8") as file:
+      string = file.read()
+
+    result = argHandler.parse([string, "--save", saveFileName])
+    result, description = argHandler.react()
+    self.assertEqual(result, ResultCodes.OK, description)
+
+    df = argHandler.getRefinedData()
+    self.assertTrue(type(df) is not None)
+    self.assertTrue(os.path.exists(saveFileName))
+
+  def test_fullCycleWithExistingFile(self):
+    argHandler = ArgumentHandler()
+    saveFileName = "saveFile.csv"
+    if os.path.exists(saveFileName):
+      os.remove(saveFileName)
+    self.assertFalse(os.path.exists(saveFileName))
+
+    result = argHandler.parse(["--filepath", "./Tests/Files/TestFile1.txt", "--save", saveFileName])
+    result, description = argHandler.react()
+    self.assertEqual(result, ResultCodes.OK, description)
+
+    df = argHandler.getRefinedData()
+    self.assertTrue(type(df) is not None)
+    self.assertTrue(os.path.exists(saveFileName))

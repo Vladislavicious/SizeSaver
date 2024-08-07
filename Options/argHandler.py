@@ -1,10 +1,9 @@
 import argparse
-from typing import Tuple, List
-
+from typing import Tuple, List, Optional
+import pandas as pd
 from Misc.codes import ResultCodes
-from DataWorker.worker import STANDARD_FILENAME
+from DataWorker.worker import FileDataWorker, STANDARD_FILENAME
 from DataWorker.converter import DataConverter
-
 from Parser.parser import myStrParser, myFileParser
 
 class ArgumentHandler:
@@ -21,10 +20,13 @@ class ArgumentHandler:
     self.parser.add_argument('string', action='store', nargs='?',
                              default="", help='gcc-size output string')
     self.parser.add_argument('--save', action='store', nargs='?',
-                             default=STANDARD_FILENAME,
+                             default=None,
                              help=f'path to file where processed\
                                   data will be stored, by default\
                                   it is "{STANDARD_FILENAME}"')
+
+    self.__df = None
+    self.__refined_df = None
 
   def parse(self, arguments: List[str] | None):
     arg_list = None
@@ -56,14 +58,32 @@ class ArgumentHandler:
     if result is not ResultCodes.OK:
       return (result, description)
 
+    self.__df = parser.getDataFrame()
+
     converter = DataConverter()
-    # converter.Initialize(
-    # Нужно удалить time из converter'a
-    # Поправить соответствующие тесты
-    # добавить в метод refine исправление None в поле с временем
+    result, description = converter.ProcessDf(self.__df)
+
+    if result is not ResultCodes.OK:
+      return (result, description)
+
+    self.__refined_df = converter.getData()
+
+    dataWorker = FileDataWorker(self.__args["save"])
+
+    result, description = dataWorker.CheckFile()
+    if result is not ResultCodes.OK:
+      return (result, description)
+
+    result, description = dataWorker.WriteDfToFile(self.__refined_df)
+    if result is not ResultCodes.OK:
+      return (result, description)
+    # dataWorker.
     # добавить сохранение в файл
     # добавить опцию для визуализации
     return (ResultCodes.OK, "All ok")
+
+  def getRefinedData(self) -> Optional[pd.DataFrame]:
+    return self.__refined_df
 
   def printHelp(self):
     self.parser.print_help()

@@ -30,14 +30,33 @@ class TestFileDataWorker(unittest.TestCase):
     self.assertEqual(result, ResultCodes.OK)
 
   def test_CheckFileValidityBadFile(self):
-    saver = FileDataWorker("file.csv")
+    badName = "fil1234e.csv"
+    self.common_DeleteFile(badName)
+    self.assertFalse(os.path.exists(badName))
+
+    saver = FileDataWorker(badName)
     result, description = saver.CheckFile()
-    self.assertEqual(result, ResultCodes.NO_FILE)
+    self.assertEqual(result, ResultCodes.OK)
+
+    self.assertTrue(os.path.exists(badName))
+    self.common_DeleteFile(badName)
+
+  def test_CantCreateBadFile(self):
+    badName = "/fil1234e.csv"
+    self.assertFalse(os.path.exists(badName))
+    self.common_DeleteFile(badName)
+
+    saver = FileDataWorker(badName)
+    result, description = saver.CheckFile()
+    self.assertEqual(result, ResultCodes.CANT_CREATE_FILE)
+
+    self.assertFalse(os.path.exists(badName))
 
   def test_CheckFileValidityStandartFile(self):
     saver = FileDataWorker(None)
     result, description = saver.CheckFile()
     self.assertEqual(result, ResultCodes.OK)
+    self.common_DeleteFile(STANDARD_FILENAME)
 
   def test_CheckFileBadFormat(self):
     saver = FileDataWorker("file.bad")
@@ -53,12 +72,16 @@ class TestFileDataWorker(unittest.TestCase):
     result, description = saver.WriteDfToFile(df)
     self.assertEqual(result, ResultCodes.OK)
 
+    self.assertTrue(os.path.exists(STANDARD_FILENAME))
+    self.common_DeleteFile(STANDARD_FILENAME)
+
   def test_ReadFromStandardFile(self):
     self.common_DeleteFile(STANDARD_FILENAME)
 
     saver = FileDataWorker(None)
     result, description = saver.CheckFile()
     self.assertEqual(result, ResultCodes.OK)
+    self.assertTrue(os.path.exists(STANDARD_FILENAME))
 
     df = pd.DataFrame(data=[1, 2, 3, 4, 5], columns=["data"])
     df.to_csv(saver.getFilename(), index=False)
@@ -66,13 +89,16 @@ class TestFileDataWorker(unittest.TestCase):
     newDf = saver.ReadDfFromFile()
     equal = df.equals(newDf)
     self.assertTrue(equal)
+    self.common_DeleteFile(STANDARD_FILENAME)
 
   def test_AppendDataToStandardFile(self):
     self.common_DeleteFile(STANDARD_FILENAME)
+    self.assertFalse(os.path.exists(STANDARD_FILENAME))
 
     saver = FileDataWorker(None)
     result, description = saver.CheckFile()
     self.assertEqual(result, ResultCodes.OK)
+    self.assertTrue(os.path.exists(STANDARD_FILENAME))
 
     df = pd.DataFrame(data=[1, 2, 3, 4, 5], columns=["data"])
     result, description = saver.WriteDfToFile(df)
@@ -86,3 +112,4 @@ class TestFileDataWorker(unittest.TestCase):
     readDf = saver.ReadDfFromFile()
     equal = newDf.equals(readDf)
     self.assertTrue(equal)
+    self.common_DeleteFile(STANDARD_FILENAME)

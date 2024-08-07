@@ -9,3 +9,4 @@ class ResultCodes(Enum):
   NO_OPTIONS = 5
   BAD_FILE_FORMAT = 6
   SIMULTUNANEOUS_OPTIONS = 7
+  CANT_CREATE_FILE = 8

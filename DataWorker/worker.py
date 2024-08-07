@@ -10,26 +10,29 @@ STANDARD_FILENAME = "size_data.csv"
 class FileDataWorker:
   def __init__(self, filename: str | None) -> None:
     if filename is None:
-      self.__CreateStandardFile()
       self.__filename = STANDARD_FILENAME
-
     else:
       self.__filename = filename
 
-  def __CreateStandardFile(self):
-    if os.path.exists(STANDARD_FILENAME):
-      return
-    with open(STANDARD_FILENAME, "w", encoding="utf-8") as file:
-      return
+  def __CreateFile(self) -> bool:
+    if os.path.exists(self.__filename):
+      return True
+    try:
+      with open(self.__filename, "w", encoding="utf-8") as file:
+        return True
+    except:
+      return False
 
   def CheckFile(self) -> Tuple[ResultCodes, str]:
     if not self.__filename.endswith(".csv"):
       return (ResultCodes.BAD_FILE_FORMAT, "Bad file format")
 
-    if os.path.exists(self.__filename):
-      return (ResultCodes.OK, "All ok")
-    else:
-      return (ResultCodes.NO_FILE, f"No such file {self.__filename}")
+    if not os.path.exists(self.__filename):
+      createResult = self.__CreateFile()
+      if createResult is False:
+        return (ResultCodes.CANT_CREATE_FILE, f"can't create file {self.__filename}")
+
+    return (ResultCodes.OK, "All ok")
 
   def WriteDfToFile(self, df: pd.DataFrame):
     if self.__isFileEmpty() is True:
