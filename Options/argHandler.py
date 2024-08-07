@@ -5,6 +5,7 @@ from Misc.codes import ResultCodes
 from DataWorker.worker import FileDataWorker, STANDARD_FILENAME
 from DataWorker.converter import DataConverter
 from Parser.parser import myStrParser, myFileParser
+from Visualise.visualizer import Visualizer
 
 class ArgumentHandler:
   def __init__(self) -> None:
@@ -24,7 +25,11 @@ class ArgumentHandler:
                              help=f'path to file where processed\
                                   data will be stored, by default\
                                   it is "{STANDARD_FILENAME}"')
-
+    params = "/".join(Visualizer.GetAvailableTypes())
+    self.parser.add_argument('--view', action='store', nargs='?',
+                             default=None,
+                             help=f'view size on graph\navailable\
+                                  parameters: {params}')
     self.__df = None
     self.__refined_df = None
 
@@ -78,7 +83,11 @@ class ArgumentHandler:
     if result is not ResultCodes.OK:
       return (result, description)
 
-    return (ResultCodes.OK, "All ok")
+    dataToShow = dataWorker.ReadDfFromFile()
+    dataToShow = dataToShow.sort_values("last modified")
+    visualizer = Visualizer(dataToShow)
+    result, description = visualizer.show(self.__args["view"])
+    return (result, description)
 
   def getRefinedData(self) -> Optional[pd.DataFrame]:
     return self.__refined_df
