@@ -7,6 +7,18 @@ from Misc.codes import ResultCodes
 from DataWorker.worker import STANDARD_FILENAME
 
 class TestArgumentHandler(unittest.TestCase):
+  def common_FullCycle(self, saveFileName: str):
+    argHandler = ArgumentHandler()
+    result = argHandler.parse(["--filepath", "./Tests/Files/TestFile1.txt",
+                               "--save", saveFileName])
+    result, description = argHandler.react()
+    self.assertEqual(result, ResultCodes.OK, description)
+
+    df = argHandler.getRefinedData()
+    self.assertTrue(type(df) is not None)
+    self.assertTrue(os.path.exists(saveFileName))
+
+
   def test_createArgParser(self):
     argHandler = ArgumentHandler()
     self.assertEqual(type(argHandler), ArgumentHandler)
@@ -108,16 +120,18 @@ class TestArgumentHandler(unittest.TestCase):
     self.assertTrue(os.path.exists(saveFileName))
 
   def test_fullCycleWithExistingFile(self):
-    argHandler = ArgumentHandler()
     saveFileName = "saveFile.csv"
     if os.path.exists(saveFileName):
       os.remove(saveFileName)
     self.assertFalse(os.path.exists(saveFileName))
 
-    result = argHandler.parse(["--filepath", "./Tests/Files/TestFile1.txt", "--save", saveFileName])
-    result, description = argHandler.react()
-    self.assertEqual(result, ResultCodes.OK, description)
+    self.common_FullCycle(saveFileName)
 
-    df = argHandler.getRefinedData()
-    self.assertTrue(type(df) is not None)
-    self.assertTrue(os.path.exists(saveFileName))
+  def test_MultipleFullCycleWithExistingFile(self):
+    saveFileName = "multSaveFile.csv"
+    if os.path.exists(saveFileName):
+      os.remove(saveFileName)
+    self.assertFalse(os.path.exists(saveFileName))
+
+    self.common_FullCycle(saveFileName)
+    self.common_FullCycle(saveFileName)

@@ -64,7 +64,7 @@ class myStrParser:
       return None
 
     rawTime = os.path.getmtime(filename)
-    time = pd.Timestamp(rawTime)
+    time = pd.Timestamp(ctime(rawTime))
 
     return time
 

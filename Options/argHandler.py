@@ -77,9 +77,7 @@ class ArgumentHandler:
     result, description = dataWorker.WriteDfToFile(self.__refined_df)
     if result is not ResultCodes.OK:
       return (result, description)
-    # dataWorker.
-    # добавить сохранение в файл
-    # добавить опцию для визуализации
+
     return (ResultCodes.OK, "All ok")
 
   def getRefinedData(self) -> Optional[pd.DataFrame]:
